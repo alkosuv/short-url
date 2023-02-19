@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gen95mis/short-url/internal/database"
 	"github.com/gen95mis/short-url/internal/service"
-	"github.com/gen95mis/short-url/internal/transport"
+	"github.com/gen95mis/short-url/internal/transport/http"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 
 	service := service.New(db)
 
-	if err := transport.Service(service); err != nil {
+	if err := http.Service(service); err != nil {
 		panic(err)
 	}
 }
