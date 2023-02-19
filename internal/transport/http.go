@@ -7,55 +7,50 @@ import (
 
 	"github.com/gen95mis/short-url/internal/model"
 	"github.com/gen95mis/short-url/internal/service"
+	"github.com/gin-gonic/gin"
 )
 
 func Service(s *service.Service) error {
-	http.HandleFunc("/short", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+	r := gin.Default()
 
+	r.POST("/short", func(ctx *gin.Context) {
 		url := new(model.URL)
-		if err := json.NewDecoder(r.Body).Decode(url); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+		if err := json.NewDecoder(ctx.Request.Body).Decode(url); err != nil {
+			ctx.JSON(http.StatusInternalServerError, nil)
 			return
 		}
 
 		hash, err := s.Set(url.Original)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
+			ctx.JSON(http.StatusInternalServerError, err)
 			return
 		}
 
 		shortenedUrl := fmt.Sprintf("http://localhost/%s", hash)
 
-		response, err := json.Marshal(shortenedUrl)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			ctx.JSON(http.StatusInternalServerError, nil)
 			return
 		}
 
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		w.Write(response)
+		ctx.JSON(http.StatusOK, shortenedUrl)
 	})
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.WriteHeader(http.StatusBadRequest)
+	r.GET("/:hash", func(ctx *gin.Context) {
+		hash, ok := ctx.Params.Get("hash")
+		if !ok {
+			ctx.JSON(http.StatusBadRequest, nil)
 			return
 		}
 
-		oridinal, err := s.Get(r.URL.Path)
+		oridinal, err := s.Get(hash)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			ctx.JSON(http.StatusInternalServerError, nil)
 			return
 		}
 
-		http.Redirect(w, r, oridinal, http.StatusFound)
+		ctx.Redirect(http.StatusFound, oridinal)
 	})
 
-	return http.ListenAndServe(":80", nil)
+	return r.Run(":80")
 }

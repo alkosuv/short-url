@@ -20,7 +20,7 @@ func New(db database.Database) *Service {
 }
 
 func (s *Service) Get(hash string) (original string, err error) {
-	return s.db.GetByHash(hash[1:])
+	return s.db.GetByHash(hash)
 }
 
 func (s *Service) Set(original string) (string, error) {
