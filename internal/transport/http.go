@@ -29,7 +29,7 @@ func Service(s *service.Service) error {
 			return
 		}
 
-		shortenedUrl := fmt.Sprintf("http://localhost:/%s", hash)
+		shortenedUrl := fmt.Sprintf("http://localhost/%s", hash)
 
 		response, err := json.Marshal(shortenedUrl)
 		if err != nil {
