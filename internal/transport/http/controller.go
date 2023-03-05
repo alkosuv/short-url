@@ -33,7 +33,7 @@ func (c *Controller) AddNewLink(ctx *gin.Context) {
 		return
 	}
 
-	shortenedUrl := fmt.Sprintf("http://localhost/%s", hash)
+	shortenedUrl := fmt.Sprintf("http://%s/%s", ctx.Request.Host, hash)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, nil)
